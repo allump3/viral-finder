@@ -42,12 +42,7 @@ app.post('/api/search', async (req, res) => {
         tools: [{ type: 'web_search_20250305', name: 'web_search' }],
         messages: [{
           role: 'user',
-          content: `Busca en internet los videos más virales y en tendencia del nicho "${niche}" en estas plataformas: ${platforms.join(', ')}. 
-Sub-nichos: ${sub || 'no especificado'}. 
-Audiencia: ${audience || 'no especificada'}. 
-Idiomas: ${languages.join(', ')}.
-Necesito: títulos reales de videos virales, nombres de creadores que dominan el nicho, formatos que más funcionan, rangos de vistas reales, y qué ganchos generan más engagement en 2024-2025. 
-Haz varias búsquedas para cubrir cada plataforma solicitada.`
+          content: `Busca videos virales del nicho "${niche}" en ${platforms.join(', ')}. Idiomas: ${languages.join(', ')}. ${sub ? 'Sub-nichos: '+sub+'.' : ''} ${audience ? 'Audiencia: '+audience+'.' : ''} Encuentra: títulos de videos virales, creadores dominantes, formatos que funcionan, vistas aproximadas. Año: 2024-2025.`
         }]
       })
     });
@@ -75,48 +70,11 @@ Haz varias búsquedas para cubrir cada plataforma solicitada.`
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 5000,
+        max_tokens: 2500,
         system: 'Eres un experto en análisis de contenido viral. Responde SOLO con JSON válido, sin texto adicional, sin bloques de código markdown.',
         messages: [{
           role: 'user',
-          content: `Con base en esta investigación web, identifica los videos más virales en tendencia.
-
-=== RESULTADOS DE BÚSQUEDA WEB ===
-${webCtx}
-=== FIN ===
-
-NICHO: ${niche}
-SUB-NICHOS: ${sub || 'no especificado'}
-AUDIENCIA: ${audience || 'no especificada'}
-PLATAFORMAS: ${platforms.join(', ')}
-IDIOMAS: ${languages.join(', ')}
-VIDEOS POR PLATAFORMA: ${count}
-
-Devuelve exactamente este JSON (solo las plataformas solicitadas: ${platforms.join(', ')}):
-{
-  "platforms": {
-    "youtube": [
-      {
-        "title": "Título real o representativo del video viral",
-        "creator": "Nombre del creador o canal",
-        "language": "Español",
-        "views": "Rango de vistas (ej: 2.3M, 800K-1.5M)",
-        "format": "Formato exacto (storytime, tutorial, reto, exposé, versus, Q&A, etc.)",
-        "hook": "El gancho o ángulo que lo hizo viral en 1 frase",
-        "why_viral": "Por qué funcionó — mecanismo psicológico o social",
-        "reference": "Búsqueda sugerida para encontrarlo"
-      }
-    ]
-  },
-  "viral_formats": ["formato 1", "formato 2", "formato 3", "formato 4", "formato 5", "formato 6", "formato 7", "formato 8"]
-}
-
-REGLAS:
-- Prioriza videos REALES encontrados en la búsqueda web
-- ${count} videos por plataforma, SOLO: ${platforms.join(', ')}
-- Distribuye idiomas: ${languages.join(', ')}
-- Títulos en el idioma indicado en "language"
-- Muy específico, nada genérico`
+          content: `Basado en esta búsqueda web, dame los videos más virales del nicho.\n\nBÚSQUEDA:\n${webCtx.slice(0, 3000)}\n\nNICHO: ${niche}\nPLATAFORMAS: ${platforms.join(', ')}\nIDIOMAS: ${languages.join(', ')}\nVIDEOS: ${count} por plataforma\n\nJSON (solo plataformas: ${platforms.join(', ')}):\n{"platforms":{"youtube":[{"title":"","creator":"","language":"","views":"","format":"","hook":"","why_viral":"","reference":""}]},"viral_formats":[""]}\n\n${count} videos por plataforma. Títulos en su idioma. Específico y real.`
         }]
       })
     });
