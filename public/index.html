@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Viral Finder</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap');
+:root{
+  --bg:#07070d;--s1:#0f0f18;--s2:#16161f;--s3:#1c1c26;
+  --b1:rgba(255,255,255,.05);--b2:rgba(255,255,255,.1);--b3:rgba(255,255,255,.16);
+  --tx:#edeaf8;--mu:#68677a;--mu2:#9c9aae;
+  --ac:#a78bfa;--ac2:#7c3aed;
+  --yt:#ff4d4d;--tt:#4de8f0;--ig:#d946a8;--fb:#5b7fd4;
+  --go:#f59e0b;--gr:#4ade80;--re:#f87171;--pk:#f472b6;
+  --r:10px;--rl:16px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh}
+
+.hd{background:var(--s1);border-bottom:1px solid var(--b1);padding:18px 36px;display:flex;align-items:center;gap:12px}
+.hd-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--ac2),#4f46e5);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.hd h1{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;letter-spacing:-.3px}
+.hd p{font-size:12px;color:var(--mu);margin-top:1px}
+
+.wrap{max-width:1080px;margin:0 auto;padding:28px 36px}
+
+.fc{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);padding:24px;margin-bottom:16px}
+.fl{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--mu);margin-bottom:14px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ff{display:flex;flex-direction:column;gap:6px}
+.ff.sp{grid-column:1/-1}
+label{font-size:12px;font-weight:500;color:var(--mu2)}
+input,select,textarea{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);color:var(--tx);font-family:'DM Sans',sans-serif;font-size:13px;padding:10px 13px;outline:none;transition:border-color .2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--ac)}
+select option{background:#13131c}
+textarea{resize:vertical;min-height:68px;line-height:1.6}
+
+.pt-row{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.ptb{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);padding:11px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:500;color:var(--mu);font-family:'DM Sans',sans-serif;transition:all .18s}
+.ptb:hover{background:var(--s3)}
+.ptb.on{background:var(--s3)}
+.ptb.on[data-p=youtube]{border-color:var(--yt);color:var(--yt)}
+.ptb.on[data-p=tiktok]{border-color:var(--tt);color:var(--tt)}
+.ptb.on[data-p=instagram]{border-color:var(--ig);color:var(--ig)}
+.ptb.on[data-p=facebook]{border-color:var(--fb);color:var(--fb)}
+.ptb-ic{font-size:20px;line-height:1}
+
+.lc-row{display:flex;flex-wrap:wrap;gap:7px}
+.lc{background:var(--s2);border:1px solid var(--b2);border-radius:18px;padding:5px 12px;font-size:11px;font-weight:500;cursor:pointer;transition:all .18s;color:var(--mu);font-family:'DM Sans',sans-serif}
+.lc:hover{background:var(--s3)}
+.lc.on{background:rgba(167,139,250,.13);border-color:var(--ac);color:var(--ac)}
+
+.run-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--ac2),#4f46e5);border:none;border-radius:var(--r);color:#fff;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;margin-top:6px}
+.run-btn:hover{transform:translateY(-1px);box-shadow:0 7px 24px rgba(124,58,237,.35)}
+.run-btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+
+.ld{display:none;flex-direction:column;align-items:center;padding:56px 32px;gap:16px;text-align:center}
+.ld.show{display:flex}
+.spin{width:38px;height:38px;border:2px solid var(--b2);border-top-color:var(--ac);border-radius:50%;animation:spin .75s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ld-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700}
+.ld-steps{width:100%;max-width:420px}
+.ld-step{display:flex;align-items:center;gap:9px;padding:9px 13px;border-radius:var(--r);background:var(--s2);border:1px solid var(--b1);margin-bottom:7px;text-align:left;transition:all .25s}
+.ld-step.on{border-color:var(--ac);background:rgba(167,139,250,.07)}
+.ld-step.ok{border-color:rgba(74,222,128,.22);background:rgba(74,222,128,.04)}
+.ld-step.er{border-color:rgba(248,113,113,.25);background:rgba(248,113,113,.06)}
+.ld-dot{font-size:13px;width:18px;text-align:center;flex-shrink:0}
+.ld-lbl{font-size:12px;flex:1;color:var(--mu2)}
+.ld-step.on .ld-lbl{color:var(--tx)}
+.ld-step.er .ld-lbl{color:var(--re)}
+.ld-elapsed{font-size:11px;color:var(--mu)}
+.ld-timer{font-size:11px;color:var(--mu)}
+
+.err{background:rgba(248,113,113,.07);border:1px solid rgba(248,113,113,.2);border-radius:var(--r);padding:13px 16px;color:var(--re);font-size:12px;display:none;margin-bottom:12px;line-height:1.6}
+.err.show{display:block}
+
+.res{display:none}
+.res.show{display:block}
+.res-hd{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.res-title{font-family:'Syne',sans-serif;font-size:19px;font-weight:800}
+.res-meta{font-size:11px;color:var(--mu);margin-top:2px}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.btn-s{background:var(--s2);border:1px solid var(--b2);border-radius:var(--r);color:var(--mu2);font-family:'DM Sans',sans-serif;font-size:11px;padding:7px 13px;cursor:pointer;transition:all .18s}
+.btn-s:hover{background:var(--s3);color:var(--tx)}
+
+.web-badge{background:rgba(74,222,128,.06);border:1px solid rgba(74,222,128,.18);border-radius:var(--r);padding:10px 14px;font-size:11px;color:#6ee89a;display:flex;align-items:center;gap:8px;margin-bottom:18px}
+
+.psec{margin-bottom:26px}
+.phd{display:flex;align-items:center;gap:9px;padding-bottom:11px;margin-bottom:13px;border-bottom:1px solid var(--b1)}
+.pbadge{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;padding:3px 10px;border-radius:16px;letter-spacing:.5px}
+.pbadge.yt{background:rgba(255,77,77,.12);color:var(--yt);border:1px solid rgba(255,77,77,.22)}
+.pbadge.tt{background:rgba(77,232,240,.08);color:var(--tt);border:1px solid rgba(77,232,240,.2)}
+.pbadge.ig{background:rgba(217,70,168,.1);color:var(--ig);border:1px solid rgba(217,70,168,.22)}
+.pbadge.fb{background:rgba(91,127,212,.1);color:var(--fb);border:1px solid rgba(91,127,212,.22)}
+.pcount{font-size:11px;color:var(--mu)}
+
+.vg{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.vc{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);padding:17px;position:relative;overflow:hidden;transition:border-color .18s,transform .18s}
+.vc:hover{border-color:var(--b2);transform:translateY(-2px)}
+.vc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--ca,var(--ac)),transparent);opacity:0;transition:opacity .18s}
+.vc:hover::after{opacity:1}
+.vc-rank{position:absolute;top:13px;right:14px;font-family:'Syne',sans-serif;font-size:9px;font-weight:700;color:var(--mu)}
+.vc-lang{display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:5px;background:rgba(45,212,191,.08);color:#5ee8d4;border:1px solid rgba(45,212,191,.16);margin-bottom:8px}
+.vc-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;line-height:1.4;margin-bottom:7px;padding-right:34px;color:var(--tx)}
+.vc-hook{font-size:11px;color:var(--mu2);line-height:1.6;margin-bottom:10px;font-style:italic;border-left:2px solid var(--b2);padding-left:9px}
+.vc-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.tag{font-size:10px;padding:3px 8px;border-radius:5px;font-weight:500}
+.tag.views{background:rgba(245,158,11,.09);color:var(--go);border:1px solid rgba(245,158,11,.18)}
+.tag.fmt{background:rgba(167,139,250,.09);color:var(--ac);border:1px solid rgba(167,139,250,.18)}
+.tag.why{background:rgba(244,114,182,.08);color:var(--pk);border:1px solid rgba(244,114,182,.18)}
+.vc-ref{font-size:11px;color:var(--mu);display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:2px}
+.ref-chip{font-size:10px;background:var(--s2);border:1px solid var(--b2);border-radius:5px;padding:2px 8px;color:var(--mu2)}
+
+.fmts{background:var(--s1);border:1px solid var(--b1);border-radius:var(--rl);padding:20px;margin-top:22px}
+.fmt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:12px}
+.fmt-item{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:10px 12px;display:flex;align-items:center;gap:8px;font-size:12px}
+.fmt-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+
+@media(max-width:680px){
+  .wrap{padding:18px 14px}.hd{padding:16px 14px}
+  .fg{grid-template-columns:1fr}.pt-row{grid-template-columns:repeat(2,1fr)}.vg{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="hd">
+  <div class="hd-icon">🔥</div>
+  <div>
+    <h1>Viral Finder</h1>
+    <p>Videos virales en tendencia por nicho y plataforma · búsqueda web real</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div id="form-sec">
+    <div class="fc">
+      <div class="fl">Nicho</div>
+      <div class="fg">
+        <div class="ff sp">
+          <label>Nicho principal</label>
+          <input id="niche" type="text" placeholder="Ej. feminidad y desarrollo personal femenino" />
+        </div>
+        <div class="ff sp">
+          <label>Sub-nichos / temas clave <span style="color:var(--mu);font-weight:400">(opcional)</span></label>
+          <textarea id="sub" placeholder="Ej. autoestima, moda femenina, mentalidad de abundancia, emprendimiento para mujeres..."></textarea>
+        </div>
+        <div class="ff">
+          <label>Audiencia</label>
+          <input id="aud" type="text" placeholder="Ej. mujeres 25-45, LATAM" />
+        </div>
+        <div class="ff">
+          <label>Videos por plataforma</label>
+          <select id="cnt">
+            <option value="5" selected>5 videos</option>
+            <option value="8">8 videos</option>
+            <option value="10">10 videos</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="fc">
+      <div class="fl">Plataformas</div>
+      <div class="pt-row">
+        <button class="ptb on" data-p="youtube"   onclick="tP(this)"><span class="ptb-ic">▶️</span>YouTube</button>
+        <button class="ptb on" data-p="tiktok"    onclick="tP(this)"><span class="ptb-ic">🎵</span>TikTok</button>
+        <button class="ptb on" data-p="instagram" onclick="tP(this)"><span class="ptb-ic">📸</span>Instagram</button>
+        <button class="ptb on" data-p="facebook"  onclick="tP(this)"><span class="ptb-ic">👥</span>Facebook</button>
+      </div>
+    </div>
+
+    <div class="fc">
+      <div class="fl">Idiomas</div>
+      <div class="lc-row">
+        <button class="lc on" data-l="Español"   onclick="tL(this)">🇪🇸 Español</button>
+        <button class="lc on" data-l="Inglés"    onclick="tL(this)">🇺🇸 Inglés</button>
+        <button class="lc"    data-l="Portugués" onclick="tL(this)">🇧🇷 Portugués</button>
+        <button class="lc"    data-l="Francés"   onclick="tL(this)">🇫🇷 Francés</button>
+        <button class="lc"    data-l="Alemán"    onclick="tL(this)">🇩🇪 Alemán</button>
+        <button class="lc"    data-l="Italiano"  onclick="tL(this)">🇮🇹 Italiano</button>
+        <button class="lc"    data-l="Árabe"     onclick="tL(this)">🇸🇦 Árabe</button>
+        <button class="lc"    data-l="Japonés"   onclick="tL(this)">🇯🇵 Japonés</button>
+        <button class="lc"    data-l="Hindi"     onclick="tL(this)">🇮🇳 Hindi</button>
+      </div>
+    </div>
+
+    <div id="err" class="err"></div>
+    <button class="run-btn" id="run-btn" onclick="run()">🔍 Buscar videos virales</button>
+  </div>
+
+  <!-- LOADING -->
+  <div class="ld" id="ld-sec">
+    <div class="spin"></div>
+    <div class="ld-title">Buscando videos virales en internet...</div>
+    <div class="ld-steps">
+      <div class="ld-step" id="st0">
+        <span class="ld-dot" id="sd0">○</span>
+        <span class="ld-lbl" id="sl0">Búsqueda web — rastreando tendencias reales del nicho</span>
+        <span class="ld-elapsed" id="se0"></span>
+      </div>
+      <div class="ld-step" id="st1">
+        <span class="ld-dot" id="sd1">○</span>
+        <span class="ld-lbl" id="sl1">Análisis — extrayendo y estructurando los resultados</span>
+        <span class="ld-elapsed" id="se1"></span>
+      </div>
+    </div>
+    <div class="ld-timer">Transcurrido: <span id="el">0s</span></div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="res" id="res-sec">
+    <div class="res-hd">
+      <div>
+        <div class="res-title" id="res-title"></div>
+        <div class="res-meta" id="res-meta"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-s" id="copy-btn" onclick="copyAll()">📋 Copiar resultados</button>
+        <button class="btn-s" onclick="back()">↩ Nueva búsqueda</button>
+      </div>
+    </div>
+    <div class="web-badge">🌐 <span id="web-info">Resultados basados en búsqueda web real</span></div>
+    <div id="res-body"></div>
+    <div class="fmts">
+      <div class="fl">📌 Formatos virales dominantes en el nicho</div>
+      <div class="fmt-grid" id="fmt-grid"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+var sP=['youtube','tiktok','instagram','facebook'], sL=['Español','Inglés'];
+var timerI=null, last=null;
+var PCLS={youtube:'yt',tiktok:'tt',instagram:'ig',facebook:'fb'};
+var PICO={youtube:'▶️',tiktok:'🎵',instagram:'📸',facebook:'👥'};
+var PCOL={youtube:'#ff4d4d',tiktok:'#4de8f0',instagram:'#d946a8',facebook:'#5b7fd4'};
+var PORD=['youtube','tiktok','instagram','facebook'];
+var FCOL=['#a78bfa','#2dd4bf','#f59e0b','#f472b6','#4ade80','#60a5fa','#fb923c','#e879f9'];
+
+function tP(b){b.classList.toggle('on');var p=b.dataset.p;sP=b.classList.contains('on')?[...sP,p]:sP.filter(function(x){return x!==p})}
+function tL(b){b.classList.toggle('on');var l=b.dataset.l;sL=b.classList.contains('on')?[...sL,l]:sL.filter(function(x){return x!==l})}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function showErr(m){var e=document.getElementById('err');e.innerHTML='<strong>Error:</strong> '+esc(m);e.classList.add('show')}
+function hideErr(){document.getElementById('err').classList.remove('show')}
+
+var t0=[0,0];
+function stepOn(i,msg){
+  var r=document.getElementById('st'+i);r.classList.remove('on','ok','er');r.classList.add('on');
+  document.getElementById('sd'+i).textContent='⏳';
+  if(msg)document.getElementById('sl'+i).textContent=msg;
+  t0[i]=Date.now();
+}
+function stepOk(i){
+  var r=document.getElementById('st'+i);r.classList.remove('on','ok','er');r.classList.add('ok');
+  document.getElementById('sd'+i).textContent='✅';
+  document.getElementById('se'+i).textContent=Math.round((Date.now()-t0[i])/1000)+'s';
+}
+function stepErr(i,msg){
+  var r=document.getElementById('st'+i);r.classList.remove('on','ok','er');r.classList.add('er');
+  document.getElementById('sd'+i).textContent='❌';
+  if(msg)document.getElementById('sl'+i).textContent=msg;
+}
+function resetSteps(){
+  [0,1].forEach(function(i){
+    var r=document.getElementById('st'+i);r.classList.remove('on','ok','er');
+    document.getElementById('sd'+i).textContent='○';
+    document.getElementById('se'+i).textContent='';
+  });
+  document.getElementById('el').textContent='0s';
+}
+function startTimer(){
+  var s=Date.now();
+  timerI=setInterval(function(){document.getElementById('el').textContent=Math.round((Date.now()-s)/1000)+'s'},500);
+}
+function stopTimer(){clearInterval(timerI)}
+
+async function run(){
+  var niche=document.getElementById('niche').value.trim();
+  var sub=document.getElementById('sub').value.trim();
+  var aud=document.getElementById('aud').value.trim();
+  var cnt=document.getElementById('cnt').value;
+  if(!niche){showErr('Ingresa el nicho.');return}
+  if(!sP.length){showErr('Selecciona al menos una plataforma.');return}
+  if(!sL.length){showErr('Selecciona al menos un idioma.');return}
+  hideErr();
+  document.getElementById('form-sec').style.display='none';
+  document.getElementById('ld-sec').classList.add('show');
+  document.getElementById('res-sec').classList.remove('show');
+  document.getElementById('run-btn').disabled=true;
+  resetSteps();startTimer();
+  stepOn(0,'Búsqueda web en curso...');
+  stepOn(1,'En espera...');
+
+  try{
+    var res=await fetch('/api/search',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({niche:niche,sub:sub,audience:aud,platforms:sP,languages:sL,count:cnt})
+    });
+    var json=await res.json();
+    stopTimer();
+    if(!res.ok||!json.ok){
+      stepErr(0,'Error en la búsqueda');
+      stepErr(1,'No completado');
+      showErrAndBack(json.error||'Error desconocido');
+      return;
+    }
+    stepOk(0);stepOk(1);
+    document.getElementById('ld-sec').classList.remove('show');
+    document.getElementById('web-info').textContent='Búsqueda web completada · '+json.webContextLength+' caracteres de contexto analizado';
+    render(json.data,{niche:niche,aud:aud});
+  }catch(e){
+    stopTimer();
+    stepErr(0,'Error de red');stepErr(1,'No completado');
+    showErrAndBack('Error de conexión: '+e.message);
+  }
+}
+
+function showErrAndBack(msg){
+  document.getElementById('ld-sec').classList.remove('show');
+  document.getElementById('form-sec').style.display='';
+  document.getElementById('run-btn').disabled=false;
+  showErr(msg);
+}
+
+function render(data,ctx){
+  last={data:data,ctx:ctx};
+  document.getElementById('res-title').textContent='Videos virales — '+ctx.niche;
+  document.getElementById('res-meta').textContent=(ctx.aud?ctx.aud+' · ':'')+new Date().toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'});
+  var body=document.getElementById('res-body');body.innerHTML='';
+  var plats=data.platforms||{};
+  PORD.forEach(function(p){
+    var vids=plats[p];if(!vids||!vids.length)return;
+    var cls=PCLS[p]||'';
+    var sec=document.createElement('div');sec.className='psec';
+    sec.innerHTML='<div class="phd"><span style="font-size:18px">'+PICO[p]+'</span><span class="pbadge '+cls+'">'+p.toUpperCase()+'</span><span class="pcount">'+vids.length+' videos</span></div><div class="vg" id="vg-'+p+'"></div>';
+    body.appendChild(sec);
+    var g=sec.querySelector('#vg-'+p);
+    vids.forEach(function(v,i){
+      var col=PCOL[p]||'var(--ac)';
+      var c=document.createElement('div');c.className='vc';c.style.setProperty('--ca',col);
+      c.innerHTML='<div class="vc-rank">#'+(i+1)+'</div>'
+        +'<div class="vc-lang">'+esc(v.language||'')+'</div>'
+        +'<div class="vc-title">'+esc(v.title||'')+'</div>'
+        +(v.hook?'<div class="vc-hook">'+esc(v.hook)+'</div>':'')
+        +'<div class="vc-tags">'
+          +(v.views?'<span class="tag views">👁 '+esc(v.views)+'</span>':'')
+          +(v.format?'<span class="tag fmt">'+esc(v.format)+'</span>':'')
+          +(v.why_viral?'<span class="tag why">⚡ '+esc(v.why_viral)+'</span>':'')
+        +'</div>'
+        +(v.creator||v.reference?'<div class="vc-ref">'
+          +(v.creator?'<span class="ref-chip">'+esc(v.creator)+'</span>':'')
+          +(v.reference?'<span class="ref-chip">🔗 '+esc(v.reference)+'</span>':'')
+        +'</div>':'');
+      g.appendChild(c);
+    });
+  });
+  var fg=document.getElementById('fmt-grid');fg.innerHTML='';
+  (data.viral_formats||[]).forEach(function(f,i){
+    var el=document.createElement('div');el.className='fmt-item';
+    el.innerHTML='<div class="fmt-dot" style="background:'+FCOL[i%FCOL.length]+'"></div><span>'+esc(f)+'</span>';
+    fg.appendChild(el);
+  });
+  document.getElementById('res-sec').classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function copyAll(){
+  if(!last)return;
+  var d=last.data,ctx=last.ctx;
+  var t='VIDEOS VIRALES EN TENDENCIA\nNicho: '+ctx.niche+'\n'+(ctx.aud?ctx.aud+'\n':'')+new Date().toLocaleDateString('es-MX')+'\n';
+  var plats=d.platforms||{};
+  PORD.forEach(function(p){
+    var vids=plats[p];if(!vids||!vids.length)return;
+    t+='\n══ '+p.toUpperCase()+' ══\n';
+    vids.forEach(function(v,i){
+      t+='\n'+(i+1)+'. ['+v.language+'] '+v.title+'\n';
+      if(v.creator)t+='   Creador: '+v.creator+'\n';
+      if(v.views)t+='   Vistas: '+v.views+'\n';
+      if(v.format)t+='   Formato: '+v.format+'\n';
+      if(v.hook)t+='   Gancho: '+v.hook+'\n';
+      if(v.why_viral)t+='   Por qué viral: '+v.why_viral+'\n';
+      if(v.reference)t+='   Ref: '+v.reference+'\n';
+    });
+  });
+  if(d.viral_formats&&d.viral_formats.length)t+='\nFORMATOS DOMINANTES:\n'+d.viral_formats.map(function(f,i){return(i+1)+'. '+f}).join('\n');
+  navigator.clipboard.writeText(t).then(function(){
+    var b=document.getElementById('copy-btn');b.textContent='✅ Copiado';
+    setTimeout(function(){b.textContent='📋 Copiar resultados'},2000);
+  });
+}
+
+function back(){
+  document.getElementById('res-sec').classList.remove('show');
+  document.getElementById('form-sec').style.display='';
+  document.getElementById('run-btn').disabled=false;
+  resetSteps();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>
